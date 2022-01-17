@@ -115,6 +115,7 @@ def allowed_file(filename):
 def upload_file():
     if request.method == "POST":
         # check if the post request has the file part
+        folder_id = request.args.get("folder_id", 0)
         if "file" not in request.files:
             return {"error": "no_file_provided"}
         file = request.files["file"]
@@ -124,7 +125,7 @@ def upload_file():
             filename = secure_filename(file.filename)
             client = Client(JWT_CONFIG)
             try:
-                box_file = client.folder(0).upload_stream(file, filename)
+                box_file = client.folder(folder_id).upload_stream(file, filename)
                 box_file_dict = {
                     "id": box_file.id,
                     "name": box_file.name,
