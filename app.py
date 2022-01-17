@@ -1,14 +1,15 @@
-from boxsdk import OAuth2, Client, JWTAuth
-from flask import Flask, redirect, request, session, flash
-from flask_session import Session
-import redis
-from werkzeug.utils import secure_filename
-from flask_cors import CORS
+import os
 from uuid import uuid4
+import redis
+from boxsdk import Client, JWTAuth, OAuth2
+from flask import Flask, redirect, request, session
+from flask_cors import CORS
+from werkzeug.utils import secure_filename
+from flask_session import Session
 
 app = Flask(__name__)
 
-app.secret_key = "super secret key"
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "default-value")
 app.config["SESSION_TYPE"] = "redis"
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_USE_SIGNER"] = True
@@ -19,9 +20,8 @@ Session(app)
 CORS(app)
 
 JWT_CONFIG = JWTAuth.from_settings_file("box_jwt_config.json")
-CLIENT_ID = "uk7qibnrff37zjirky6jlmzdcjfoi6ar"
-CLIENT_SECRET = "YlA2LUCG6qmthkGBVcr95eVpOHm2Iu6W"
-APP_TOKEN = "EYryn4JFrVdmxoo8BP5RJbYJ2Ka0DreL"
+CLIENT_ID = os.getenv("BOX_CLIENT_ID")
+CLIENT_SECRET = os.getenv("BOX_CLIENT_SECRET")
 
 auth = OAuth2(
     client_id=CLIENT_ID,
@@ -29,10 +29,8 @@ auth = OAuth2(
 )
 
 EXCLUDED_EXTENSIONS = []
-UPLOAD_FOLDER = "/home/impas/upload/"
 
 
-@app.route("/")
 def hello_world():
 
     if "access_token" in session and "refresh_token" in session:
@@ -114,7 +112,6 @@ def allowed_file(filename):
 @app.route("/upload", methods=["POST"])
 def upload_file():
     if request.method == "POST":
-        # check if the post request has the file part
         folder_id = request.args.get("folder_id", 0)
         if "file" not in request.files:
             return {"error": "no_file_provided"}
@@ -141,5 +138,3 @@ def upload_file():
 
 
 app.run(host="0.0.0.0", debug=True, port=4000)
-
-# https://yasoob.me/posts/how-to-setup-and-deploy-jwt-auth-using-react-and-flask/
