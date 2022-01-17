@@ -4,7 +4,7 @@ from flask_session import Session
 import redis
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
-import os
+from uuid import uuid4
 
 app = Flask(__name__)
 
@@ -70,9 +70,23 @@ def get_items():
                 "id": item.id,
                 "name": item.name,
                 "shared_link": item.get_shared_link(),
+                "type": item.type,
             }
         )
     return {"folder_id": folder_id, "files": box_files}
+
+
+@app.route("/folder", methods=["POST"])
+def create_folder():
+    folder_name = request.args.get("name", str(uuid4()))
+    parent_folder_id = request.args.get("id", 0)
+    client = Client(JWT_CONFIG)
+    subfolder = client.folder(parent_folder_id).create_subfolder(folder_name)
+    return {
+        "folder_id": subfolder.id,
+        "name": subfolder.name,
+        "parent_folder_id": subfolder.parent.id,
+    }
 
 
 @app.route("/login")
