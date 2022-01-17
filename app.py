@@ -57,6 +57,24 @@ def hello_world():
     return redirect("/login")
 
 
+@app.route("/folder")
+def get_items():
+    folder_id = request.args.get("id", 0)
+    client = Client(JWT_CONFIG)
+    root = client.folder(folder_id=folder_id).get()
+    items = root.get_items(limit=50, offset=0)
+    box_files = []
+    for item in items:
+        box_files.append(
+            {
+                "id": item.id,
+                "name": item.name,
+                "shared_link": item.get_shared_link(),
+            }
+        )
+    return {"folder_id": folder_id, "files": box_files}
+
+
 @app.route("/login")
 def login():
     auth_url, csrf_token = auth.get_authorization_url("http://127.0.0.1:5000/oauth2")
@@ -84,13 +102,10 @@ def upload_file():
     if request.method == "POST":
         # check if the post request has the file part
         if "file" not in request.files:
-            flash("No file part")
-            return redirect(request.url)
+            return {"error": "no_file_provided"}
         file = request.files["file"]
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename.
         if file.filename == "":
-            return {"error": "NO_FILE_PROVIDED"}
+            return {"error": "no_filename_provided"}
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             client = Client(JWT_CONFIG)
