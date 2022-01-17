@@ -94,13 +94,20 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             client = Client(JWT_CONFIG)
-            box_file = client.folder(0).upload_stream(file, filename)
-            box_file_dict = {
-                "id": box_file.id,
-                "embed_url": box_file.get_embed_url(),
-                "folder_id": box_file.parent.id,
-            }
-            return box_file_dict
+            try:
+                box_file = client.folder(0).upload_stream(file, filename)
+                box_file_dict = {
+                    "id": box_file.id,
+                    "name": box_file.name,
+                    "embed_url": box_file.get_embed_url(),
+                    "folder_id": box_file.parent.id,
+                }
+                return box_file_dict
+            except Exception as error:
+                return {
+                    "error": error.code,
+                    "name": error.context_info["conflicts"]["name"],
+                }
 
 
 app.run(host="0.0.0.0", debug=True, port=4000)
