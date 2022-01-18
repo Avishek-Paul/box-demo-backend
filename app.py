@@ -63,14 +63,17 @@ def get_items():
     items = root.get_items(limit=50, offset=0)
     box_files = []
     for item in items:
-        box_files.append(
-            {
-                "id": item.id,
-                "name": item.name,
-                "shared_link": item.get_shared_link(),
-                "type": item.type,
-            }
-        )
+        file_info = {
+            "id": item.id,
+            "name": item.name,
+            "shared_link": item.get_shared_link(),
+            "type": item.type,
+        }
+        if item.type == "folder":
+            curr_folder = item.get()
+            file_info["num_items"] = curr_folder.item_collection["total_count"]
+        box_files.append(file_info)
+
     return {"folder_id": folder_id, "files": box_files}
 
 
