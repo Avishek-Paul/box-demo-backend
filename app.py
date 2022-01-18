@@ -61,6 +61,7 @@ def get_items():
     client = Client(JWT_CONFIG)
     root = client.folder(folder_id=folder_id).get()
     items = root.get_items(limit=50, offset=0)
+
     box_files = []
     for item in items:
         file_info = {
@@ -74,7 +75,15 @@ def get_items():
             file_info["num_items"] = curr_folder.item_collection["total_count"]
         box_files.append(file_info)
 
-    return {"folder_id": folder_id, "files": box_files}
+    folder_info = {
+        "id": folder_id,
+        "name": root.name,
+    }
+
+    if folder_id != "0":
+        folder_info["parent"] = {"id": root.parent.id, "name": root.parent.name}
+
+    return {"folder": folder_info, "files": box_files}
 
 
 @app.route("/folder", methods=["POST"])
