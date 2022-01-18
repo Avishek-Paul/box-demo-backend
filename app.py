@@ -57,7 +57,7 @@ def hello_world():
 
 @app.route("/folder")
 def get_items():
-    folder_id = request.args.get("id", 0)
+    folder_id = int(request.args.get("id", 0))
     client = Client(JWT_CONFIG)
     root = client.folder(folder_id=folder_id).get()
     items = root.get_items(limit=50, offset=0)
@@ -80,7 +80,7 @@ def get_items():
         "name": root.name,
     }
 
-    if folder_id != "0":
+    if folder_id != 0:
         folder_info["parent"] = {"id": root.parent.id, "name": root.parent.name}
 
     return {"folder": folder_info, "files": box_files}
