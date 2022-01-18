@@ -137,4 +137,4 @@ def upload_file():
                 }
 
 
-app.run(host="0.0.0.0", debug=True, port=4000)
+app.run(host="0.0.0.0", debug=True)
