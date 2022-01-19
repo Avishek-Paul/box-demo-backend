@@ -1,4 +1,3 @@
-import os
 from uuid import uuid4
 from boxsdk import Client, JWTAuth
 from flask import Flask, request
@@ -8,14 +7,7 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 CORS(app)
 
-JWT_CONFIG = JWTAuth(
-    client_id=os.getenv("CLIENT_ID"),
-    client_secret=os.getenv("CLIENT_SECRET"),
-    enterprise_id=os.getenv("ENTERPRISE_ID"),
-    jwt_key_id=os.getenv("JWT_KEY_ID"),
-    rsa_private_key_data=os.getenv("RSA_PRIVATE_KEY_DATA"),
-    rsa_private_key_passphrase=os.getenv("RSA_PRIVATE_KEY_PASSPHRASE"),
-)
+JWT_CONFIG = JWTAuth.from_settings_file("box_jwt_config.json")
 EXCLUDED_EXTENSIONS = []
 
 
